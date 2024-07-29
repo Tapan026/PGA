@@ -1,0 +1,95 @@
+---
+- name: Create prometheus user group
+  ansible.builtin.group:
+    name: "{{ prometheus_group }}"
+  become: true
+
+- name: Create prometheus user
+  ansible.builtin.user:
+    name: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    system: yes
+    shell: "/sbin/nologin"
+    comment: "{{ prometheus_user }} nologin User"
+    createhome: "no"
+    state: present
+  become: true
+
+- name: Download Prometheus
+  ansible.builtin.get_url:
+    url: "{{ prometheus_download_url }}"
+    dest: "/tmp/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
+  become: true
+
+- name: Install Prometheus
+  ansible.builtin.unarchive:
+    src: "/tmp/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
+    dest: /tmp/
+    remote_src: yes
+  become: true
+
+- name: Copy prometheus binary to bin
+  ansible.builtin.copy:
+    src: "/tmp/prometheus-{{ prometheus_version }}.linux-amd64/prometheus"
+    dest: "{{ prometheus_home }}/prometheus"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: 0755
+  become: true
+
+- name: Delete prometheus tmp folder
+  ansible.builtin.file:
+    path: '/tmp/prometheus-{{ prometheus_version }}.linux-amd64'
+    state: absent
+  become: true
+
+- name: Create data directory
+  ansible.builtin.file:
+    path: "{{ prometheus_data_dir }}"
+    state: directory
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: 0755
+  become: true
+
+- name: Create config directory
+  ansible.builtin.file:
+    path: "{{ prometheus_config_dir }}"
+    state: directory
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: 0755
+  become: true
+  
+- name: Configure Prometheus
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: "{{ prometheus_config_dir }}/prometheus.yml"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: 0644
+  become: true
+
+- name: Copy systemd service file
+  ansible.builtin.copy:
+    src: prometheus.service
+    dest: /etc/systemd/system/prometheus.service
+  notify: systemd_reload
+  become: true
+
+- name: Start Prometheus service
+  ansible.builtin.service:
+    name: prometheus
+    state: started
+    enabled: yes
+  become: true
+
+- name: Check if Prometheus is accessible
+  ansible.builtin.uri:
+    url: "http://{{ prometheus_host }}:9090"
+    method: GET
+    status_code: 200
+  register: prometheus_status
+  until: prometheus_status.status == 200
+  retries: 5
+  delay: 10

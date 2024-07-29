@@ -1,0 +1,19 @@
+---
+- name: Reload systemd
+  command: systemctl daemon-reload
+  listen: systemd_reload
+
+#prometheus
+- name: Restart the Prometheus service
+  service:
+    name: prometheus
+    state: restarted
+  listen: restart_prometheus
+
+#Grafana
+- name: Restart Grafana
+  ansible.builtin.systemd:
+    name: grafana
+    state: restarted
+    enabled: yes
+  listen: restart_grafana

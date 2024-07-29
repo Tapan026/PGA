@@ -1,0 +1,15 @@
+[Prometheus]
+3.89.242.129 ansible_user=ubuntu
+
+[alertmanager] 
+3.89.242.129 ansible_user=ubuntu
+
+[node_exporter] 
+3.89.242.129 ansible_user=ubuntu
+
+[grafana] 
+3.89.242.129 ansible_user=ubuntu
+
+
+
+

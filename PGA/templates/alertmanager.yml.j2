@@ -1,0 +1,27 @@
+global:
+  resolve_timeout: 5m
+
+receivers:
+- name: 'email-alert'
+  email_configs:
+  - to: 'tapan.sahu@opstree.com'
+    from: 'tapan.sahu@opstree.com'
+    smarthost: 'smtp.example.com:587'
+    auth_username: 'tapan.sahu@opstree.com'
+    auth_password: 'yourpassword'
+    require_tls: true
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 5m
+  repeat_interval: 3h
+  receiver: 'email-alert'
+  routes:
+  - match:
+      severity: 'critical'
+    receiver: 'email-alert'
+    group_by: ['alertname', 'severity']
+    group_wait: 10s
+    group_interval: 5m
+    repeat_interval: 1h

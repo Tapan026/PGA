@@ -1,0 +1,51 @@
+[server]
+# The http port to use
+http_port = 3000
+# The address to bind to
+http_addr = 0.0.0.0
+# Protocol (http or https)
+protocol = http
+# Path to the certificate file (for https)
+cert_file =
+# Path to the key file (for https)
+cert_key =
+# Enable or disable the server
+enabled = true
+
+[database]
+# Database type: sqlite3, mysql, postgres
+type = sqlite3
+# Path to the database file (only needed for sqlite3)
+path = data/grafana.db
+
+[log]
+# Log level: info, debug, warn, error
+level = info
+# Path to log file
+file = /var/log/grafana/grafana.log
+
+[security]
+# Admin username
+admin_user = admin
+# Admin password
+admin_password = admin
+# Secret key for signing cookies
+secret_key =
+
+[auth]
+# Enable or disable anonymous access
+disable_anonymous = false
+# Enable or disable OAuth authentication
+disable_login_form = false
+
+[alerting]
+# Enable or disable alerting
+enabled = true
+# Path to the alerting configuration file
+alerting_config_file = conf/alerting.yaml
+
+[plugins]
+# Path to plugins directory
+path = /var/lib/grafana/plugins
+# Enable or disable plugin updates
+allow_loading_unsigned_plugins = false

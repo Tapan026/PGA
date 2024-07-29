@@ -1,0 +1,84 @@
+# tasks/install.yml
+---
+- name: Create alertmanager user group
+  ansible.builtin.group:
+    name: "{{ alertmanager_group }}"
+  become: true
+
+- name: Create alertmanager user
+  ansible.builtin.user:
+    name: "{{ alertmanager_user }}"
+    group: "{{ alertmanager_group }}"
+    system: yes
+    shell: "/sbin/nologin"
+    comment: "{{ alertmanager_user }} nologin User"
+    createhome: "no"
+    state: present
+  become: true
+
+- name: Create required directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ alertmanager_user }}"
+    group: "{{ alertmanager_group }}"
+    mode: 0755
+  loop:
+    - "{{ alertmanager_home }}"
+    - "{{ alertmanager_data_dir }}"
+    - "{{ alertmanager_log_dir }}"
+  become: yes 
+
+- name: Download Alertmanager
+  ansible.builtin.get_url:
+    url: "{{ alertmanager_download_url }}"
+    dest: "/tmp/alertmanager-{{ alertmanager_version }}.linux-amd64.tar.gz"
+    mode: '0644'
+  become: true
+
+- name: Extract Alertmanager
+  ansible.builtin.unarchive:
+    src: "/tmp/alertmanager-{{ alertmanager_version }}.linux-amd64.tar.gz"
+    dest: "{{ alertmanager_home }}"
+    remote_src: yes
+  become: true
+
+- name: Set permissions for Alertmanager home
+  ansible.builtin.file:
+    path: "{{ alertmanager_home }}"
+    state: directory
+    owner: "{{ alertmanager_user }}"
+    group: "{{ alertmanager_group }}"
+    recurse: yes
+  become: true
+
+- name: Copy systemd service file
+  ansible.builtin.copy:
+    src: alertmanager.service
+    dest: /etc/systemd/system/alertmanager.service
+  notify: systemd_reload
+  become: true
+
+- name: Copy config file
+  ansible.builtin.template:
+    src: alertmanager.yml.j2
+    dest: /etc/alertmanager/alertmanager.yml
+  become: true
+
+- name: Start Alertmanager service
+  ansible.builtin.service:
+    name: alertmanager
+    state: started
+    enabled: yes
+  become: true
+
+- name: Check if Alertmanager is accessible
+  ansible.builtin.uri:
+    url: "http://{{ prometheus_host }}:9093"
+    method: GET
+    status_code: 200
+  register: alertmanager_status
+  until: alertmanager_status.status == 200
+  retries: 5
+  delay: 10
+
