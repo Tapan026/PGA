@@ -1,15 +1,16 @@
----
 - name: Create grafana user
   ansible.builtin.user:
     name: "{{ grafana_user }}"
     system: yes
   become: true
+  when: inventory_hostname in groups['grafana']
 
 - name: Create grafana group
   ansible.builtin.group:
     name: "{{ grafana_group }}"
     system: yes
   become: true
+  when: inventory_hostname in groups['grafana']
 
 - name: Create required directories
   ansible.builtin.file:
@@ -23,20 +24,59 @@
     - "{{ grafana_data_dir }}"
     - "{{ grafana_log_dir }}"
     - "{{ grafana_config_dir }}"
+    - "{{ grafana_server_binary }}"
   become: true
+  when: inventory_hostname in groups['grafana']
 
-- name: Download Grafana
+- name: Add Grafana GPG key
   ansible.builtin.get_url:
-    url: "{{ grafana_download_url }}"
-    dest: "/tmp/grafana-enterprise-{{ grafana_version }}.linux-amd64.tar.gz"
+    url: https://apt.grafana.com/gpg.key
+    dest: /etc/apt/keyrings/grafana.gpg
     mode: '0644'
-  
-- name: Install Grafana
-  ansible.builtin.unarchive:
-    src: "/tmp/grafana-enterprise-{{ grafana_version }}.linux-amd64.tar.gz"
-    dest: /tmp/
-    remote_src: yes
   become: true
+  when: inventory_hostname in groups['grafana']
+
+- name: Add Grafana APT repository
+  ansible.builtin.lineinfile:
+    path: /etc/apt/sources.list.d/grafana.list
+    line: "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main"
+    create: yes
+  become: true
+  notify: update_cache
+  when: inventory_hostname in groups['grafana']
+
+- name: Install Grafana Enterprise
+  apt:
+    name: grafana
+    state: present
+  become: true
+  when: inventory_hostname in groups['grafana']
+
+# - name: Download Grafana
+#   ansible.builtin.get_url:
+#     url: "{{ grafana_download_url }}"
+#     dest: "/tmp/grafana-enterprise-{{ grafana_version }}.linux-amd64.tar.gz"
+#     mode: '0644'
+#   become: true
+#   when: inventory_hostname in groups['grafana']
+  
+# - name: Install Grafana
+#   ansible.builtin.unarchive:
+#     src: "/tmp/grafana-enterprise-{{ grafana_version }}.linux-amd64.tar.gz"
+#     dest: /tmp/
+#     remote_src: yes
+#   become: true
+#   when: inventory_hostname in groups['grafana']
+
+# - name: Copy prometheus binary to bin
+#   ansible.builtin.copy:
+#     src: "/tmp/grafana-enterprise-{{ grafana_version }}.linux-amd64.tar.gz"
+#     dest: "{{ grafana_server_binary }}"
+#     owner: "{{ grafana_user }}"
+#     group: "{{ grafana_group }}"
+#     mode: 0755
+#   become: true
+#   when: inventory_hostname in groups['grafana']
 
 - name: Set permissions
   ansible.builtin.file:
@@ -46,6 +86,7 @@
     group: "{{ grafana_group }}"
     recurse: yes
   become: true
+  when: inventory_hostname in groups['grafana']
 
 - name: Configure Grafana
   ansible.builtin.template:
@@ -55,13 +96,18 @@
     group: "{{ grafana_group }}"
     mode: '0644'
   become: true
+  when: inventory_hostname in groups['grafana']
 
 - name: Copy systemd service file
   ansible.builtin.copy:
     src: grafana.service
     dest: /etc/systemd/system/grafana.service
+    owner: root
+    group: root
+    mode: '0644'
   notify: systemd_reload
   become: true
+  when: inventory_hostname in groups['grafana']
 
 - name: Start Grafana service
   ansible.builtin.service:
@@ -69,13 +115,23 @@
     state: started
     enabled: yes
   become: true
+  when: inventory_hostname in groups['grafana']
 
-- name: Check if Grafana is accessible
-  ansible.builtin.uri:
-    url: "http://{{ prometheus_host }}:3000"
-    method: GET
-    status_code: 200
-  register: prometheus_status
-  until: prometheus_status.status == 200
-  retries: 5
-  delay: 10
+- name: Verify Grafana service is running
+  ansible.builtin.systemd:
+    name: Grafana
+    state: started
+    enabled: yes
+  become: true
+  when: inventory_hostname in groups['grafana']
+
+# - name: Check if Grafana is accessible
+#   ansible.builtin.uri:
+#     url: "http://{{ prometheus_host }}:3000"
+#     method: GET
+#     status_code: 200
+#   register: prometheus_status
+#   until: prometheus_status.status == 200
+#   retries: 5
+#   delay: 10
+#   when: inventory_hostname in groups['grafana']

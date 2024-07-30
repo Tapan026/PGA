@@ -1,5 +1,7 @@
 ---
-- hosts: localhost
-  remote_user: root
+- name: Setup PGA
+  hosts: all
+  remote_user: ubuntu
+  become: true
   roles:
     - PGA

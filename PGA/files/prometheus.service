@@ -1,14 +1,12 @@
 [Unit]
 Description=Prometheus
-After=network.target
+Wants=network-online.target
+After=network-online.target
 
 [Service]
-Type=simple
-User={{ prometheus_user }}
-Group={{ prometheus_group }}
-ExecStart={{ prometheus_home }}/prometheus --config.file={{ prometheus_config_dir }}/prometheus.yml --storage.tsdb.path={{ prometheus_data_dir }}
-Restart=on-failure
+User=prometheus
+ExecStart=/usr/local/bin/prometheus --config.file /etc/prometheus/prometheus.yml --storage.tsdb.path /data/prometheus
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
-

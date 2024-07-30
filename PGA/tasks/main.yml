@@ -1,12 +1,13 @@
 ---
 - name: Installing prometheus
   ansible.builtin.include_tasks: prometheus.yml
-  #when: inventory_hostname in groups['prometheus']
+  when: install_prometheus == True
 
 - name: Installing alertmanger
   ansible.builtin.include_tasks: alertmanager.yml
-  #when: inventory_hostname in groups['alertmanager']
+  when: install_alertmanager == True
 
 - name: Installing grafana
   ansible.builtin.include_tasks: grafana.yml
-  #when: inventory_hostname in groups['alertmanager']
+  when: install_grafana == True
+  

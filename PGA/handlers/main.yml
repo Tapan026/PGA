@@ -1,4 +1,9 @@
 ---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  listen: update_cache
+
 - name: Reload systemd
   command: systemctl daemon-reload
   listen: systemd_reload

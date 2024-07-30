@@ -3,6 +3,7 @@
   ansible.builtin.group:
     name: "{{ prometheus_group }}"
   become: true
+  when: inventory_hostname in groups['prometheus']
 
 - name: Create prometheus user
   ansible.builtin.user:
@@ -14,12 +15,14 @@
     createhome: "no"
     state: present
   become: true
+  when: inventory_hostname in groups['prometheus']
 
 - name: Download Prometheus
   ansible.builtin.get_url:
     url: "{{ prometheus_download_url }}"
     dest: "/tmp/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
   become: true
+  when: inventory_hostname in groups['prometheus']
 
 - name: Install Prometheus
   ansible.builtin.unarchive:
@@ -27,21 +30,30 @@
     dest: /tmp/
     remote_src: yes
   become: true
+  when: inventory_hostname in groups['prometheus']
 
-- name: Copy prometheus binary to bin
-  ansible.builtin.copy:
-    src: "/tmp/prometheus-{{ prometheus_version }}.linux-amd64/prometheus"
-    dest: "{{ prometheus_home }}/prometheus"
-    owner: "{{ prometheus_user }}"
-    group: "{{ prometheus_group }}"
-    mode: 0755
+# - name: Copy prometheus binary to bin
+#   ansible.builtin.copy:
+#     src: "/tmp/prometheus-{{ prometheus_version }}.linux-amd64/prometheus"
+#     dest: "{{ prometheus_home }}/prometheus"
+#     owner: "{{ prometheus_user }}"
+#     group: "{{ prometheus_group }}"
+#     mode: 0755
+#   become: true
+#   when: inventory_hostname in groups['prometheus']
+
+- name: Move prometheus binary to bin
+  ansible.builtin.command:
+    cmd: mv /tmp/prometheus-{{ prometheus_version }}.linux-amd64/prometheus {{ prometheus_home }}/prometheus
   become: true
+  when: inventory_hostname in groups['prometheus']
 
 - name: Delete prometheus tmp folder
   ansible.builtin.file:
     path: '/tmp/prometheus-{{ prometheus_version }}.linux-amd64'
     state: absent
   become: true
+  when: inventory_hostname in groups['prometheus']
 
 - name: Create data directory
   ansible.builtin.file:
@@ -51,6 +63,7 @@
     group: "{{ prometheus_group }}"
     mode: 0755
   become: true
+  when: inventory_hostname in groups['prometheus']
 
 - name: Create config directory
   ansible.builtin.file:
@@ -60,6 +73,7 @@
     group: "{{ prometheus_group }}"
     mode: 0755
   become: true
+  when: inventory_hostname in groups['prometheus']
   
 - name: Configure Prometheus
   ansible.builtin.template:
@@ -69,6 +83,7 @@
     group: "{{ prometheus_group }}"
     mode: 0644
   become: true
+  when: inventory_hostname in groups['prometheus']
 
 - name: Copy systemd service file
   ansible.builtin.copy:
@@ -76,6 +91,7 @@
     dest: /etc/systemd/system/prometheus.service
   notify: systemd_reload
   become: true
+  when: inventory_hostname in groups['prometheus']
 
 - name: Start Prometheus service
   ansible.builtin.service:
@@ -83,13 +99,22 @@
     state: started
     enabled: yes
   become: true
+  when: inventory_hostname in groups['prometheus']
 
-- name: Check if Prometheus is accessible
-  ansible.builtin.uri:
-    url: "http://{{ prometheus_host }}:9090"
-    method: GET
-    status_code: 200
-  register: prometheus_status
-  until: prometheus_status.status == 200
-  retries: 5
-  delay: 10
+- name: Verify Prometheus service is running
+  ansible.builtin.systemd:
+    name: Prometheus
+    state: started
+    enabled: yes
+  become: true
+  when: inventory_hostname in groups['prometheus']
+
+# - name: Check if Prometheus is accessible
+#   ansible.builtin.uri:
+#     url: "http://{{ prometheus_host }}:9090"
+#     method: GET
+#     status_code: 200
+#   register: prometheus_status
+#   until: prometheus_status.status == 200
+#   retries: 5
+#   delay: 10

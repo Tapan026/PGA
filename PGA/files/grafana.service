@@ -3,12 +3,13 @@ Description=Grafana
 After=network.target
 
 [Service]
-Type=simple
 User=grafana
 Group=grafana
-ExecStart=/usr/share/grafana/bin/grafana-server --config.file=/etc/grafana/grafana.ini
-RestartSec=5
+ExecStart=/usr/bin/grafana-server --config=/etc/grafana/grafana.ini --homepath=/usr/share/grafana
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
+
+
 

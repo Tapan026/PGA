@@ -1,9 +1,9 @@
-# tasks/install.yml
 ---
 - name: Create alertmanager user group
   ansible.builtin.group:
     name: "{{ alertmanager_group }}"
   become: true
+  when: inventory_hostname in groups['alertmanager']
 
 - name: Create alertmanager user
   ansible.builtin.user:
@@ -15,6 +15,7 @@
     createhome: "no"
     state: present
   become: true
+  when: inventory_hostname in groups['alertmanager']
 
 - name: Create required directories
   ansible.builtin.file:
@@ -27,7 +28,9 @@
     - "{{ alertmanager_home }}"
     - "{{ alertmanager_data_dir }}"
     - "{{ alertmanager_log_dir }}"
+    - "{{ alertmanager_config_dir }}"
   become: yes 
+  when: inventory_hostname in groups['alertmanager']
 
 - name: Download Alertmanager
   ansible.builtin.get_url:
@@ -35,6 +38,7 @@
     dest: "/tmp/alertmanager-{{ alertmanager_version }}.linux-amd64.tar.gz"
     mode: '0644'
   become: true
+  when: inventory_hostname in groups['alertmanager']
 
 - name: Extract Alertmanager
   ansible.builtin.unarchive:
@@ -42,6 +46,7 @@
     dest: "{{ alertmanager_home }}"
     remote_src: yes
   become: true
+  when: inventory_hostname in groups['alertmanager']
 
 - name: Set permissions for Alertmanager home
   ansible.builtin.file:
@@ -51,6 +56,7 @@
     group: "{{ alertmanager_group }}"
     recurse: yes
   become: true
+  when: inventory_hostname in groups['alertmanager']
 
 - name: Copy systemd service file
   ansible.builtin.copy:
@@ -58,12 +64,14 @@
     dest: /etc/systemd/system/alertmanager.service
   notify: systemd_reload
   become: true
+  when: inventory_hostname in groups['alertmanager']
 
 - name: Copy config file
   ansible.builtin.template:
     src: alertmanager.yml.j2
     dest: /etc/alertmanager/alertmanager.yml
   become: true
+  when: inventory_hostname in groups['alertmanager']
 
 - name: Start Alertmanager service
   ansible.builtin.service:
@@ -71,14 +79,23 @@
     state: started
     enabled: yes
   become: true
+  when: inventory_hostname in groups['alertmanager']
 
-- name: Check if Alertmanager is accessible
-  ansible.builtin.uri:
-    url: "http://{{ prometheus_host }}:9093"
-    method: GET
-    status_code: 200
-  register: alertmanager_status
-  until: alertmanager_status.status == 200
-  retries: 5
-  delay: 10
+- name: Verify Alertmanager service is running
+  ansible.builtin.systemd:
+    name: alertmanager
+    state: started
+    enabled: yes
+  become: true
+  when: inventory_hostname in groups['alertmanager']
 
+# - name: Check if Alertmanager is accessible
+#   ansible.builtin.uri:
+#     url: "http://{{ prometheus_host }}:9093"
+#     method: GET
+#     status_code: 200
+#   register: alertmanager_status
+#   until: alertmanager_status.status == 200
+#   retries: 5
+#   delay: 10
+#   when: inventory_hostname in groups['alertmanager']

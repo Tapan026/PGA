@@ -1,4 +1,8 @@
 ---
+install_prometheus: true
+install_alertmanager: true
+install_grafana: true
+
 #prometheus 
 prometheus_version: "2.43.0"
 prometheus_user: "prometheus"
@@ -7,24 +11,26 @@ prometheus_home: "/usr/local/bin"
 prometheus_data_dir: "/data/prometheus"
 prometheus_config_dir: "/etc/prometheus"
 prometheus_download_url: "https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
-serviceName: "prometheus"
-prometheus_host: 3.89.242.129
+# prometheus_serviceName: "prometheus"
+prometheus_host: 52.91.53.33
 
-#Alermanager
+#Alertmanager
 alertmanager_version: "0.27.0"  
 alertmanager_user: "alertmanager"
 alertmanager_group: "alertmanager"
-alertmanager_home: "/usr/share/alertmanager"
+alertmanager_home: "/usr/local/bin/alertmanager"
 alertmanager_data_dir: "/data/alertmanager/"
 alertmanager_log_dir: "/var/log/alertmanager/"
+alertmanager_config_dir: "/etc/alertmanager"
 alertmanager_download_url: "https://github.com/prometheus/alertmanager/releases/download/v{{ alertmanager_version }}/alertmanager-{{ alertmanager_version }}.linux-amd64.tar.gz"
-serviceName: "alertmanager"
+# alertmanager_serviceName: "alertmanager"
 
 #Grafana
 grafana_version: "11.1.3"
 grafana_download_url: "https://dl.grafana.com/enterprise/release/grafana-enterprise-{{ grafana_version }}.linux-amd64.tar.gz"
 grafana_user: "grafana"
 grafana_group: "grafana"
+grafana_server_binary: "/usr/bin/grafana-server"
 grafana_home: "/usr/share/grafana"
 grafana_data_dir: "/var/lib/grafana"
 grafana_log_dir: "/var/log/grafana"
