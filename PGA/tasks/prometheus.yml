@@ -103,7 +103,7 @@
 
 - name: Verify Prometheus service is running
   ansible.builtin.systemd:
-    name: Prometheus
+    name: prometheus
     state: started
     enabled: yes
   become: true

@@ -1,9 +1,9 @@
 plugin: amazon.aws.aws_ec2
 regions:
-  - us-east-1
+  - ap-south-1
 
-# aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
-# aws_secret_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+aws_secret_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
 
 keyed_groups:
   - key: tags.Name
@@ -16,7 +16,7 @@ hostnames:
 compose:
   ansible_host: ip_address
   ansible_user: ubuntu
-  ansible_ssh_private_key_file: "/home/ubuntu/PGA_Role/keyo1.pem"
+  ansible_ssh_private_key_file: "/home/ubuntu/PGA_Role/key02.pem"
 
 groups:
   prometheus: "'prometheus' in (tags['Name'] | default(''))"

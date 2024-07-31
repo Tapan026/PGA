@@ -24,9 +24,25 @@
     - "{{ grafana_data_dir }}"
     - "{{ grafana_log_dir }}"
     - "{{ grafana_config_dir }}"
-    - "{{ grafana_server_binary }}"
   become: true
   when: inventory_hostname in groups['grafana']
+
+# Uncomment and adjust as needed
+# - name: Download Grafana
+#   ansible.builtin.get_url:
+#     url: "{{ grafana_download_url }}"
+#     dest: "/tmp/grafana-enterprise-{{ grafana_version }}.linux-amd64.tar.gz"
+#     mode: '0644'
+#   become: true
+#   when: inventory_hostname in groups['grafana']
+  
+# - name: Install Grafana
+#   ansible.builtin.unarchive:
+#     src: "/tmp/grafana-enterprise-{{ grafana_version }}.linux-amd64.tar.gz"
+#     dest: /tmp/
+#     remote_src: yes
+#   become: true
+#   when: inventory_hostname in groups['grafana']
 
 - name: Add Grafana GPG key
   ansible.builtin.get_url:
@@ -52,32 +68,6 @@
   become: true
   when: inventory_hostname in groups['grafana']
 
-# - name: Download Grafana
-#   ansible.builtin.get_url:
-#     url: "{{ grafana_download_url }}"
-#     dest: "/tmp/grafana-enterprise-{{ grafana_version }}.linux-amd64.tar.gz"
-#     mode: '0644'
-#   become: true
-#   when: inventory_hostname in groups['grafana']
-  
-# - name: Install Grafana
-#   ansible.builtin.unarchive:
-#     src: "/tmp/grafana-enterprise-{{ grafana_version }}.linux-amd64.tar.gz"
-#     dest: /tmp/
-#     remote_src: yes
-#   become: true
-#   when: inventory_hostname in groups['grafana']
-
-# - name: Copy prometheus binary to bin
-#   ansible.builtin.copy:
-#     src: "/tmp/grafana-enterprise-{{ grafana_version }}.linux-amd64.tar.gz"
-#     dest: "{{ grafana_server_binary }}"
-#     owner: "{{ grafana_user }}"
-#     group: "{{ grafana_group }}"
-#     mode: 0755
-#   become: true
-#   when: inventory_hostname in groups['grafana']
-
 - name: Set permissions
   ansible.builtin.file:
     path: "{{ grafana_home }}"
@@ -88,26 +78,25 @@
   become: true
   when: inventory_hostname in groups['grafana']
 
-- name: Configure Grafana
-  ansible.builtin.template:
-    src: "grafana.ini.j2"
-    dest: "{{ grafana_config_dir }}/grafana.ini"
-    owner: "{{ grafana_user }}"
-    group: "{{ grafana_group }}"
-    mode: '0644'
-  become: true
-  when: inventory_hostname in groups['grafana']
+# Uncomment and adjust as needed
+# - name: Configure Grafana
+#   ansible.builtin.template:
+#     src: "grafana.ini.j2"
+#     dest: "{{ grafana_config_dir }}/grafana.ini"
+#     owner: "{{ grafana_user }}"
+#     group: "{{ grafana_group }}"
+#     mode: '0644'
+#   become: true
+#   when: inventory_hostname in groups['grafana']
 
-- name: Copy systemd service file
-  ansible.builtin.copy:
-    src: grafana.service
-    dest: /etc/systemd/system/grafana.service
-    owner: root
-    group: root
-    mode: '0644'
-  notify: systemd_reload
-  become: true
-  when: inventory_hostname in groups['grafana']
+# Uncomment and adjust as needed
+# - name: Copy systemd service file
+#   ansible.builtin.copy:
+#     src: grafana.service
+#     dest: /etc/systemd/system/grafana.service
+#   notify: systemd_reload
+#   become: true
+#   when: inventory_hostname in groups['grafana']
 
 - name: Start Grafana service
   ansible.builtin.service:
@@ -119,7 +108,7 @@
 
 - name: Verify Grafana service is running
   ansible.builtin.systemd:
-    name: Grafana
+    name: grafana
     state: started
     enabled: yes
   become: true
