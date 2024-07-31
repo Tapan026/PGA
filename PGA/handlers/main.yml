@@ -2,6 +2,12 @@
 - name: Reload systemd
   command: systemctl daemon-reload
   listen: systemd_reload
+  become: true
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  listen: update_cache
 
 #prometheus
 - name: Restart the Prometheus service

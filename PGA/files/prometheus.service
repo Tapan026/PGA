@@ -3,12 +3,12 @@ Description=Prometheus
 After=network.target
 
 [Service]
-Type=simple
-User={{ prometheus_user }}
-Group={{ prometheus_group }}
-ExecStart={{ prometheus_home }}/prometheus --config.file={{ prometheus_config_dir }}/prometheus.yml --storage.tsdb.path={{ prometheus_data_dir }}
+User=prometheus
+Group=prometheus
+ExecStart=/usr/local/bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/data/prometheus
 Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
+
 

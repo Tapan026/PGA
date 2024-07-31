@@ -27,7 +27,8 @@
     - "{{ alertmanager_home }}"
     - "{{ alertmanager_data_dir }}"
     - "{{ alertmanager_log_dir }}"
-  become: yes 
+    - "{{ alertmanager_config_dir }}"
+  become: yes
 
 - name: Download Alertmanager
   ansible.builtin.get_url:
