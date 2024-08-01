@@ -3,7 +3,7 @@ Description=Grafana
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin --config.file=/etc/grafana/grafana.ini
+ExecStart=/usr/local/bin/grafana --config.file=/etc/grafana/grafana.ini
 Restart=always
 User=grafana
 Group=grafana

@@ -81,32 +81,32 @@
     recurse: yes
   become: true
 
-- name: Configure Grafana
-  ansible.builtin.template:
-    src: "grafana.ini.j2"
-    dest: "{{ grafana_config_dir }}/grafana.ini"
-    owner: "{{ grafana_user }}"
-    group: "{{ grafana_group }}"
-    mode: '0644'
-  become: true
+# - name: Configure Grafana
+#   ansible.builtin.template:
+#     src: "grafana.ini.j2"
+#     dest: "{{ grafana_config_dir }}/grafana.ini"
+#     owner: "{{ grafana_user }}"
+#     group: "{{ grafana_group }}"
+#     mode: '0644'
+#   become: true
 
-- name: Copy systemd service file
-  ansible.builtin.copy:
-    src: grafana.service
-    dest: /etc/systemd/system/grafana.service
-  notify: systemd_reload
-  become: true
+# - name: Copy systemd service file
+#   ansible.builtin.copy:
+#     src: grafana.service
+#     dest: /etc/systemd/system/grafana.service
+#   notify: systemd_reload
+#   become: true
 
 - name: Start Grafana service
   ansible.builtin.service:
-    name: grafana
+    name: grafana-server
     state: started
     enabled: yes
   become: true
 
 - name: Verify Grafana service is running
   ansible.builtin.systemd:
-    name: grafana
+    name: grafana-server
     state: started
     enabled: yes
   become: true
