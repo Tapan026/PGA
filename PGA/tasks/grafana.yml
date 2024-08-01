@@ -29,8 +29,9 @@
   apt:
     name: 
       - libfontconfig1
-      - musl
+      # - musl
     state: present
+  become: true
 
 - name: Download Grafana Enterprise package
   ansible.builtin.get_url:
@@ -41,6 +42,7 @@
   ansible.builtin.apt:
     deb: /tmp/grafana-enterprise_11.1.3_amd64.deb
     state: present
+  become: true
 
 - name: Copy prometheus binary to bin
   ansible.builtin.copy:

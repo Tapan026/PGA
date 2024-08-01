@@ -1,11 +1,11 @@
 [Prometheus]
-54.197.220.230 ansible_user=ubuntu
+34.238.118.157 ansible_user=ubuntu
 
 [alertmanager] 
-54.197.220.230 ansible_user=ubuntu
+34.238.118.157 ansible_user=ubuntu
 
 [grafana] 
-54.197.220.230 ansible_user=ubuntu
+34.238.118.157 ansible_user=ubuntu
 
 
 
