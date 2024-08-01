@@ -27,11 +27,11 @@ alertmanager_download_url: "https://github.com/prometheus/alertmanager/releases/
 
 #Grafana
 grafana_version: "11.1.3"
-grafana_download_url: "https://dl.grafana.com/enterprise/release/grafana-enterprise-{{ grafana_version }}.linux-amd64.tar.gz"
+grafana_download_url: https://dl.grafana.com/enterprise/release/grafana-enterprise_{{ grafana_version }}_amd64.deb
+                      # "https://dl.grafana.com/enterprise/release/grafana-enterprise-{{ grafana_version }}.linux-amd64.tar.gz"
 grafana_user: "grafana"
 grafana_group: "grafana"
-grafana_server_binary: "/usr/bin/grafana-server"
-grafana_home: "/usr/share/grafana"
+grafana_home: "/usr/local/bin"
 grafana_data_dir: "/var/lib/grafana"
 grafana_log_dir: "/var/log/grafana"
 grafana_config_dir: "/etc/grafana"
