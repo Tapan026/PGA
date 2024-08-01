@@ -83,13 +83,3 @@
     state: started
     enabled: yes
   become: true
-
-- name: Check if Prometheus is accessible
-  ansible.builtin.uri:
-    url: "http://{{ prometheus_host }}:9090"
-    method: GET
-    status_code: 200
-  register: prometheus_status
-  until: prometheus_status.status == 200
-  retries: 5
-  delay: 10

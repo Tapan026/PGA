@@ -73,13 +73,3 @@
     enabled: yes
   become: true
 
-- name: Check if Alertmanager is accessible
-  ansible.builtin.uri:
-    url: "http://{{ prometheus_host }}:9093"
-    method: GET
-    status_code: 200
-  register: alertmanager_status
-  until: alertmanager_status.status == 200
-  retries: 5
-  delay: 10
-

@@ -11,25 +11,10 @@
     system: yes
   become: true
 
-- name: Create required directories
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: directory
-    owner: "{{ grafana_user }}"
-    group: "{{ grafana_group }}"
-    mode: '0755'
-  loop:
-    - "{{ grafana_home }}"
-    - "{{ grafana_data_dir }}"
-    - "{{ grafana_log_dir }}"
-    - "{{ grafana_config_dir }}"
-  become: true
-
 - name: Install dependencies
   apt:
     name: 
       - libfontconfig1
-      # - musl
     state: present
   become: true
 
@@ -53,6 +38,20 @@
     mode: 0755
   become: true
 
+# - name: Create required directories
+#   ansible.builtin.file:
+#     path: "{{ item }}"
+#     state: directory
+#     owner: "{{ grafana_user }}"
+#     group: "{{ grafana_group }}"
+#     mode: '0755'
+#   loop:
+#     - "{{ grafana_home }}"
+#     - "{{ grafana_data_dir }}"
+#     - "{{ grafana_log_dir }}"
+#     - "{{ grafana_config_dir }}"
+#   become: true
+
 # - name: Add Grafana GPG key
 #   ansible.builtin.get_url:
 #     url: https://apt.grafana.com/gpg.key
@@ -74,14 +73,14 @@
 #     state: present
 #   become: true
 
-- name: Set permissions
-  ansible.builtin.file:
-    path: "{{ grafana_home }}"
-    state: directory
-    owner: "{{ grafana_user }}"
-    group: "{{ grafana_group }}"
-    recurse: yes
-  become: true
+# - name: Set permissions
+#   ansible.builtin.file:
+#     path: "{{ grafana_home }}"
+#     state: directory
+#     owner: "{{ grafana_user }}"
+#     group: "{{ grafana_group }}"
+#     recurse: yes
+#   become: true
 
 # - name: Configure Grafana
 #   ansible.builtin.template:
@@ -112,13 +111,3 @@
     state: started
     enabled: yes
   become: true
-
-- name: Check if Grafana is accessible
-  ansible.builtin.uri:
-    url: "http://{{ prometheus_host }}:3000"
-    method: GET
-    status_code: 200
-  register: prometheus_status
-  until: prometheus_status.status == 200
-  retries: 5
-  delay: 10
